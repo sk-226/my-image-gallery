@@ -4,23 +4,12 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+  --background-rgb: 255, 255, 255;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+  background: rgb(var(--background-rgb));
 }
 
 @layer utilities {
@@ -31,18 +20,32 @@ body {
 
 .my-masonry-grid {
   display: flex;
-  margin-left: -30px;
-  /* 左の余白を調整 */
+  margin-left: -16px; /* より小さい余白 */
   width: auto;
 }
 
 .my-masonry-grid_column {
-  padding-left: 30px;
-  /* カラム間の余白 */
+  padding-left: 16px; /* より小さいカラム間隔 */
   background-clip: padding-box;
 }
 
 .my-masonry-grid_column>div {
-  margin-bottom: 30px;
-  /* 画像間の余白 */
+  margin-bottom: 16px; /* より小さい画像間隔 */
+}
+
+/* 画像を包む div のスタイル */
+.image-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  width: 100%;
+}
+
+/* 画像自体のスタイル */
+.image-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  transition: transform 0.3s ease;
 }

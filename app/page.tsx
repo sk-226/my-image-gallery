@@ -1,8 +1,7 @@
 "use client";
 
-
-import React from 'react';
-import Masonry from 'react-masonry-css'
+import React, { useEffect, useState } from 'react';
+import Masonry from 'react-masonry-css';
 
 const images = [
   { src: '/images/photo1.jpg', alt: 'Photo 1' },
@@ -16,30 +15,74 @@ const images = [
 ];
 
 const breakpointColumnsObj = {
-  default: 3,
-  1100: 2,
-  700: 1,
+  default: 4, // デスクトップでは4列
+  1400: 3,    // 大きめの画面では3列
+  1000: 2,    // タブレットでは2列
+  700: 1      // モバイルでは1列
 };
 
 const HomePage = () => {
+  const [imageData, setImageData] = useState<Array<{src: string; alt: string; width?: number; height?: number}>>([]);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+  
+  useEffect(() => {
+    // 画像のメタデータを取得して正確な寸法を保存
+    const loadImageDimensions = async () => {
+      // Make sure we're in browser environment
+      if (typeof window === 'undefined') {
+        return;
+      }
+      
+      const loadPromises = images.map(image => {
+        return new Promise<{src: string; alt: string; width: number; height: number}>((resolve) => {
+          const img = new window.Image();
+          img.onload = () => {
+            resolve({
+              src: image.src,
+              alt: image.alt,
+              width: img.width,
+              height: img.height
+            });
+          };
+          img.src = image.src;
+        });
+      });
+      
+      const loadedImages = await Promise.all(loadPromises);
+      setImageData(loadedImages);
+      setImagesLoaded(true);
+    };
+    
+    loadImageDimensions();
+  }, []);
+  
   return (
-    <div className="bg-white min-h-screen p-6">
+    <div className="bg-white min-h-screen p-4">
       <h1 className="text-3xl font-bold text-center mb-6 text-black">My Image Gallery</h1>
-      <Masonry
-        breakpointCols={breakpointColumnsObj}
-        className='my-masonry-grid'
-        columnClassName='my-masonry-grid_column'
-      >
-        {images.map((image, index) => (
-          <div key={index} className="mb-4">
-            <img
-              src={image.src}
-              alt={image.alt}
-              className="w-full h-auto rounded-lg"
-            />
-          </div>
-        ))}
-      </Masonry>
+      
+      {imagesLoaded ? (
+        <Masonry
+          breakpointCols={breakpointColumnsObj}
+          className='my-masonry-grid'
+          columnClassName='my-masonry-grid_column'
+        >
+          {imageData.map((image, index) => (
+            <div key={index} className="image-item">
+              <img
+                src={image.src}
+                alt={image.alt}
+                loading="lazy"
+                width={image.width}
+                height={image.height}
+              />
+            </div>
+          ))}
+        </Masonry>
+      ) : (
+        <div className="flex justify-center items-center h-40">
+          <p>Loading gallery...</p>
+        </div>
+      )}
     </div>
   );
 };
